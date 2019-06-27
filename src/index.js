@@ -15,6 +15,7 @@ const LazyEditor = React.lazy(() =>
 const Root = styled.div`
   display: flex;
   padding: ${gridSize() * 3}px;
+  max-width: 700px;
 
   > :first-child {
     margin-right: ${gridSize()}px;
