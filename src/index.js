@@ -6,7 +6,7 @@ import Button from "@atlaskit/button";
 import Avatar from "@atlaskit/avatar";
 import AttachmentIcon from "@atlaskit/icon/glyph/attachment";
 import { colors, gridSize, borderRadius } from "@atlaskit/theme";
-import Motion, { Scale, InverseScale } from "@element-motion/core";
+import Motion, { Reveal, Move, VisibilityManager } from "@element-motion/core";
 
 const LazyEditor = React.lazy(() =>
   import("@atlaskit/editor-core").then(modu => ({ default: modu.Editor }))
@@ -50,7 +50,6 @@ const Delimeter = styled.span`
 const EditorContainer = styled.div`
   width: 100%;
   position: relative;
-  min-height: 150px;
   overflow: hidden;
 
   .akEditor ~ div {
@@ -82,14 +81,28 @@ const ButtonGroup = styled.div`
   }
 `;
 
-const ExpandedContainer = styled.div``;
+const ExpandedContainer = styled.div`
+  padding: ${gridSize()}px;
+
+  > * {
+    margin-right: ${gridSize() * 4}px;
+  }
+`;
 
 const RootContainer = styled.div`
   width: 100%;
 `;
 
-const InnerContainer = styled.div`
-  width: 100%;
+const EditorHeightSpacing = styled.div`
+  min-height: 150px;
+`;
+
+const AbsoluteButtons = styled.div`
+  display: flex;
+  position: absolute;
+  align-items: center;
+  left: 80px;
+  top: 34px;
 `;
 
 function App() {
@@ -98,21 +111,39 @@ function App() {
 
   const buttons = (
     <>
-      <Button
-        spacing={isCollapsed ? "none" : "default"}
-        appearance="link"
-        onClick={() => setCommentState("internal")}
-      >
-        Add internal note
-      </Button>
+      <Motion name="internal">
+        <Move scaleX={false} scaleY={false}>
+          {motion => (
+            <Button
+              spacing={"none"}
+              appearance="link"
+              onClick={() => setCommentState("internal")}
+              ref={motion.ref}
+              style={motion.style}
+            >
+              Add internal note
+            </Button>
+          )}
+        </Move>
+      </Motion>
+
       {isCollapsed && <Delimeter />}
-      <Button
-        spacing={isCollapsed ? "none" : "default"}
-        appearance="link"
-        onClick={() => setCommentState("customer")}
-      >
-        Reply to customer
-      </Button>
+
+      <Motion name="customer">
+        <Move scaleX={false} scaleY={false}>
+          {motion => (
+            <Button
+              spacing={"none"}
+              appearance="link"
+              onClick={() => setCommentState("customer")}
+              ref={motion.ref}
+              style={motion.style}
+            >
+              Reply to customer
+            </Button>
+          )}
+        </Move>
+      </Motion>
     </>
   );
 
@@ -120,24 +151,21 @@ function App() {
     <Root>
       <Avatar />
 
+      {isCollapsed && <AbsoluteButtons>{buttons}</AbsoluteButtons>}
+
       {isCollapsed && (
         <Motion name="editor-box">
-          <Scale>
-            {({ ref, ...motion }) => (
-              <CollapsedContainer innerRef={ref} {...motion}>
-                <InverseScale>
-                  {inverse => (
-                    <InnerContainer {...inverse}>
-                      {buttons}
-                      <IconContainer>
-                        <AttachmentIcon primaryColor={colors.N100} />
-                      </IconContainer>
-                    </InnerContainer>
-                  )}
-                </InverseScale>
-              </CollapsedContainer>
-            )}
-          </Scale>
+          <Move scaleX={false} scaleY={false} zIndex={1}>
+            <Reveal useClipPath={false}>
+              {({ ref, ...motion }) => (
+                <CollapsedContainer innerRef={ref} {...motion}>
+                  <IconContainer>
+                    <AttachmentIcon primaryColor={colors.N100} />
+                  </IconContainer>
+                </CollapsedContainer>
+              )}
+            </Reveal>
+          </Move>
         </Motion>
       )}
 
@@ -145,23 +173,25 @@ function App() {
         <RootContainer>
           <ExpandedContainer>{buttons}</ExpandedContainer>
 
-          <Motion name="editor-box">
-            <Scale>
-              {({ ref, ...motion }) => (
-                <EditorContainer innerRef={ref} {...motion}>
-                  <InverseScale>
-                    {inverse => (
-                      <InnerContainer {...inverse}>
-                        <React.Suspense fallback={null}>
-                          <LazyEditor appearance="comment" />
-                        </React.Suspense>
-                      </InnerContainer>
+          <VisibilityManager>
+            {visibility => (
+              <Motion name="editor-box">
+                <Move scaleX={false} scaleY={false} zIndex={1}>
+                  <Reveal useClipPath={false}>
+                    {({ ref, ...motion }) => (
+                      <EditorContainer innerRef={ref} {...motion}>
+                        <span {...visibility}>
+                          <React.Suspense fallback={<EditorHeightSpacing />}>
+                            <LazyEditor appearance="comment" />
+                          </React.Suspense>
+                        </span>
+                      </EditorContainer>
                     )}
-                  </InverseScale>
-                </EditorContainer>
-              )}
-            </Scale>
-          </Motion>
+                  </Reveal>
+                </Move>
+              </Motion>
+            )}
+          </VisibilityManager>
 
           <ButtonGroup>
             <Button
