@@ -48,7 +48,6 @@ const Delimeter = styled.span`
 const EditorContainer = styled.div`
   width: 100%;
   position: relative;
-  overflow: hidden;
 
   .akEditor ~ div {
     display: none;
@@ -57,6 +56,7 @@ const EditorContainer = styled.div`
   :after {
     content: "";
     position: absolute;
+    pointer-events: none;
     top: 0;
     left: 0;
     bottom: 0;
