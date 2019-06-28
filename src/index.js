@@ -223,7 +223,7 @@ function App() {
                         <EditorContainer innerRef={ref} {...motion}>
                           <Fade {...visibilityToOpacity(visibility)}>
                             <React.Suspense fallback={<EditorHeightSpacing />}>
-                              <LazyEditor appearance="comment" />
+                              <LazyEditor shouldFocus appearance="comment" />
                             </React.Suspense>
                           </Fade>
                         </EditorContainer>
