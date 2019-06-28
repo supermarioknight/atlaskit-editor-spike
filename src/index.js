@@ -8,11 +8,16 @@ import AttachmentIcon from "@atlaskit/icon/glyph/attachment";
 import { colors, gridSize, borderRadius } from "@atlaskit/theme";
 import Motion, { Reveal, Move, VisibilityManager } from "@element-motion/core";
 import { Editor as LazyEditor } from "@atlaskit/editor-core";
+import image from "./bg.png";
 
 const Root = styled.div`
   display: flex;
   padding: ${gridSize() * 3}px;
-  max-width: 700px;
+  position: absolute;
+  top: 268px;
+  left: 381px;
+  width: 806px;
+  background-color: white;
 
   > :first-child {
     margin-right: ${gridSize()}px;
@@ -108,6 +113,18 @@ const Fade = styled.div`
   transition: opacity 150ms;
 `;
 
+const Product = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 1625px;
+  height: 865px;
+  background-size: cover;
+  background-image: url(${image});
+`;
+
 const visibilityToOpacity = obj => {
   const { visibility, style } = obj.style;
 
@@ -188,70 +205,76 @@ function App() {
   );
 
   return (
-    <Root>
-      <Avatar />
+    <>
+      <Product />
 
-      {isCollapsed && <AbsoluteButtons>{buttons}</AbsoluteButtons>}
+      <Root>
+        <Avatar />
 
-      {isCollapsed && (
-        <Motion name="editor-box">
-          <Move scaleX={false} scaleY={false} zIndex={1}>
-            <Reveal useClipPath={false}>
-              {({ ref, ...motion }) => (
-                <CollapsedContainer innerRef={ref} {...motion}>
-                  <IconContainer>
-                    <AttachmentIcon primaryColor={colors.N100} />
-                  </IconContainer>
-                </CollapsedContainer>
+        {isCollapsed && <AbsoluteButtons>{buttons}</AbsoluteButtons>}
+
+        {isCollapsed && (
+          <Motion name="editor-box">
+            <Move scaleX={false} scaleY={false} zIndex={1}>
+              <Reveal useClipPath={false}>
+                {({ ref, ...motion }) => (
+                  <CollapsedContainer innerRef={ref} {...motion}>
+                    <IconContainer>
+                      <AttachmentIcon primaryColor={colors.N100} />
+                    </IconContainer>
+                  </CollapsedContainer>
+                )}
+              </Reveal>
+            </Move>
+          </Motion>
+        )}
+
+        {!isCollapsed && (
+          <RootContainer>
+            <ExpandedContainer>{buttons}</ExpandedContainer>
+
+            <VisibilityManager>
+              {visibility => (
+                <>
+                  <Motion name="editor-box">
+                    <Move scaleX={false} scaleY={false} zIndex={1}>
+                      <Reveal useClipPath={false}>
+                        {({ ref, ...motion }) => (
+                          <EditorContainer innerRef={ref} {...motion}>
+                            <Fade {...visibilityToOpacity(visibility)}>
+                              <React.Suspense
+                                fallback={<EditorHeightSpacing />}
+                              >
+                                <LazyEditor shouldFocus appearance="comment" />
+                              </React.Suspense>
+                            </Fade>
+                          </EditorContainer>
+                        )}
+                      </Reveal>
+                    </Move>
+                  </Motion>
+
+                  <ButtonGroup {...visibilityToOpacity(visibility)}>
+                    <Button
+                      appearance="primary"
+                      onClick={() => setCommentState("collapsed")}
+                    >
+                      Submit
+                    </Button>
+                    <Button
+                      appearance="subtle-link"
+                      onClick={() => setCommentState("collapsed")}
+                    >
+                      Cancel
+                    </Button>
+                  </ButtonGroup>
+                </>
               )}
-            </Reveal>
-          </Move>
-        </Motion>
-      )}
-
-      {!isCollapsed && (
-        <RootContainer>
-          <ExpandedContainer>{buttons}</ExpandedContainer>
-
-          <VisibilityManager>
-            {visibility => (
-              <>
-                <Motion name="editor-box">
-                  <Move scaleX={false} scaleY={false} zIndex={1}>
-                    <Reveal useClipPath={false}>
-                      {({ ref, ...motion }) => (
-                        <EditorContainer innerRef={ref} {...motion}>
-                          <Fade {...visibilityToOpacity(visibility)}>
-                            <React.Suspense fallback={<EditorHeightSpacing />}>
-                              <LazyEditor shouldFocus appearance="comment" />
-                            </React.Suspense>
-                          </Fade>
-                        </EditorContainer>
-                      )}
-                    </Reveal>
-                  </Move>
-                </Motion>
-
-                <ButtonGroup {...visibilityToOpacity(visibility)}>
-                  <Button
-                    appearance="primary"
-                    onClick={() => setCommentState("collapsed")}
-                  >
-                    Submit
-                  </Button>
-                  <Button
-                    appearance="subtle-link"
-                    onClick={() => setCommentState("collapsed")}
-                  >
-                    Cancel
-                  </Button>
-                </ButtonGroup>
-              </>
-            )}
-          </VisibilityManager>
-        </RootContainer>
-      )}
-    </Root>
+            </VisibilityManager>
+          </RootContainer>
+        )}
+      </Root>
+    </>
   );
 }
 
