@@ -73,7 +73,7 @@ const IconContainer = styled.div`
 
 const ButtonGroup = styled.div`
   margin-top: ${gridSize() * 2}px;
-  transition: opacity 200ms;
+  transition: opacity 150ms;
 
   > * {
     margin-right: 4px;
@@ -105,7 +105,7 @@ const AbsoluteButtons = styled.div`
 `;
 
 const Fade = styled.div`
-  transition: opacity 200ms;
+  transition: opacity 150ms;
 `;
 
 const visibilityToOpacity = obj => {
@@ -122,6 +122,8 @@ const visibilityToOpacity = obj => {
 function App() {
   const [state, setCommentState] = React.useState("collapsed");
   const isCollapsed = state === "collapsed";
+  const isInternal = state === "internal";
+  const isCustomer = state === "customer";
 
   const buttons = (
     <>
@@ -134,6 +136,18 @@ function App() {
               onClick={() => setCommentState("internal")}
               ref={motion.ref}
               style={motion.style}
+              theme={(curr, theme) => {
+                const { buttonStyles, ...rest } = curr(theme);
+
+                return {
+                  buttonStyles: {
+                    ...buttonStyles,
+                    color: isInternal ? `#172b4d` : buttonStyles.color,
+                    fontWeight: isInternal ? 500 : buttonStyles.fontWeight
+                  },
+                  ...rest
+                };
+              }}
             >
               Add internal note
             </Button>
@@ -152,6 +166,18 @@ function App() {
               onClick={() => setCommentState("customer")}
               ref={motion.ref}
               style={motion.style}
+              theme={(curr, theme) => {
+                const { buttonStyles, ...rest } = curr(theme);
+
+                return {
+                  buttonStyles: {
+                    ...buttonStyles,
+                    color: isCustomer ? `#172b4d` : buttonStyles.color,
+                    fontWeight: isCustomer ? 500 : buttonStyles.fontWeight
+                  },
+                  ...rest
+                };
+              }}
             >
               Reply to customer
             </Button>
